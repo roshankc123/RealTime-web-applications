@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body onload="connect()">
+    WebSocket is already connected when body loaded<br>
+    <!-- <button onclick="connect()">connect</button> -->
+    <input type="text" name="" id="ip">
+    <button onclick="send()">send</button>
+    <div id="message"></div>
+</body>
+<script>
+    var socket;
+    var container = document.getElementById('message');
+    var sendContainer = document.getElementById('ip')
+    function connect(){
+        fetch('/ws')
+        socket = new WebSocket('ws://localhost:8765')
+                // console.log(socket)
+                socket.onmessage = (event) => {
+                    // console.log(event.data)
+                    let div = document.createElement('span')
+                    div.innerHTML = event.data
+                    div.append(document.createElement('br'))
+                    container.append(div)
+                }
+        
+        
+    }
+    function send(){
+        socket.send(sendContainer.value)
+    }
+
+    // socket.onopen = (event) => {
+    //     console.log(event)
+    // }
+    // socket.send('hello')
+</script>
+</html>
