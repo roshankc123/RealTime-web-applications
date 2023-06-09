@@ -19,7 +19,7 @@
     var sendContainer = document.getElementById('ip')
     function connect(){
         fetch('/ws')
-        socket = new WebSocket('ws://localhost:8765')
+        socket = new WebSocket('ws://127.0.0.1:8080')
                 // console.log(socket)
                 socket.onmessage = (event) => {
                     // console.log(event.data)

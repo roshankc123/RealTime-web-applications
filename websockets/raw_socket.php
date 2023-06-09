@@ -44,8 +44,6 @@
     
     socket_set_nonblock($sock);
     
-    
-    
 
     $client = [];  // contain a list of associative array {'id', 'connection handler'}
 
