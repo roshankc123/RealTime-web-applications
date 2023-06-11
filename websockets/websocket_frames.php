@@ -201,3 +201,31 @@
 		return $frame;
 	}
 }
+
+
+/////
+//custom written header ky extractor
+function genWebSockKey($string){
+    $lines = explode(PHP_EOL,$string);
+    // var_dump($lines);
+                $headers = [];
+
+                foreach ($lines as $index=>$header){
+                    if ($index > 0){
+
+                        // Trim the header of whitespace - is it blank?
+                        if (trim($header) !== ""){
+
+                            // Extract the header name and value
+                            preg_match("/([^\:]+): \s*(.+)/", $header, $matches);
+                            $headers[$matches[1]] = $matches[2];
+                        }
+                    }
+                }
+
+                $uuid = '3a703da1-93db-41dd-b306-36e40d824288';
+                // print_r($headers['Sec-WebSocket-Key']);
+                // var_dump($headers);
+                return base64_encode(sha1($headers['Sec-WebSocket-Key'].$uuid, true));
+
+}

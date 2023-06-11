@@ -10,38 +10,38 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body onload="">
-    <!-- <div id="chata">
-        <input type="text" id='ipa'>
-        <button onclick="senda()">send</button>
-        <div id="maina"></div>
+    <div id="setid">
+        <input type="text" id='id-inp'>
+        <button onclick="setid()">send</button>
     </div>
-    <div id="chatb">
-        <input type="text" id='ipb'>
-        <button onclick="sendb()">send</button>
-        <div id="mainb"></div>
-    </div> -->
+        <input type="text" id='inp'>
+        <button onclick="send()">send</button>
     <div id="main"></div>
 </body>
 <script type='text/babel'>
 
     const container = document.getElementById('main');
-    const containerb = document.getElementById('mainb');
     var doc;
     var root;
-    // const root = ReactDOM.createRoot(container);
-        // function senda(){
-        //     var doc = document.createElement('span')
-        //     var root = ReactDOM.createRoot(doc)
-        //     root.render(<Hello url={'?key=a&data=' + document.getElementById('ipa').value} />)
-        //     containera.appendChild(doc)
-        // }
-        // function sendb(){
-        //     var doc = document.createElement('span')
-        //     var root = ReactDOM.createRoot(doc)
-        //     root.render(<Hello url={'?key=b&data=' + document.getElementById('ipa').value} />)
-        //     containerb.appendChild(doc)
-        // }
-        function Hello(props){
+    var id;
+
+        function setid(){
+            id = document.getElementById('id-inp').value;
+            document.getElementById('setid').innerHTML = 'id set to '+ id + '<br>';
+            Load(id);
+        }
+
+        function send(){
+            var doc = document.createElement('span')
+            var root = ReactDOM.createRoot(doc)
+            let messageDiv = document.getElementById('inp');
+            root.render(<RenderElement url={'?id='+id+'&data=' + messageDiv.value} />)
+            // container.appendChild(document.createElement('span').innerHTML='you:')
+            container.appendChild(doc)
+            messageDiv.value = ''
+        }
+
+        function RenderElement(props){
             console.log(props)
             const [data, setdata] = React.useState(null)
             React.useEffect(() => {
@@ -58,19 +58,10 @@
             }, []);
             return <p>{data}</p>
         }
-        // function Load(iKey){
-        //     var doc = document.createElement('span')
-        //     var root = ReactDOM.createRoot(doc)
-        //     root.render(<Hello iKey={iKey}/>)
-        //     container.appendChild(doc)
-        // }
-        // function onload(){
-        //     setInterval(() => {
-        //         Load()
-        //     }, 2000);
-        // }
-        async function Load() {
-            let response = await fetch('server.php?key=a');
+
+        // key represent own's id
+        async function Load(key) {
+            let response = await fetch('server.php?id='+key);
 
             if (response.status == 502) {
             // Connection timeout
@@ -89,14 +80,14 @@
             if(message != ''){
                 var doc = document.createElement('span')
                 var root = ReactDOM.createRoot(doc)
+                // container.appendChild(document.createElement('span').innerHTML='other:')
                 root.render(<p>{message}</p>)
                 container.appendChild(doc)
             }
             
-            await Load();
+            await Load(key);
             
             }
         }
-        // subscribe()
     </script>
 </html>

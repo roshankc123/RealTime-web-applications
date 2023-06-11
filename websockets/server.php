@@ -12,7 +12,7 @@
     include 'websocket_frames.php';
 
     $frame = new Frames();
-    ini_set('error_reporting', 0);
+    ini_set('error_reporting', 1);
     
     
     // Set time limit to indefinite execution(no timeout)
@@ -41,7 +41,7 @@
     
     // Start listening for connections
     
-    socket_listen($sock, 5);
+    socket_listen($sock);
     
     
     
@@ -51,8 +51,8 @@
     
     
 
-    $client = null;  // contain a list of associative array {'id', 'connection handler'}
-
+    $client = [];  // contain a list of associative array {'id', 'connection handler'}
+    $newclient = null;
     // Loop continuously
     while (true)
     
@@ -61,20 +61,24 @@
         if ($newsock = @socket_accept($sock))
     
         {
-            // printf('new sock');
-            $client = $newsock;
-            
-            // $msg = 'HEAD / HTTP/1.1';
+            printf('new user'.PHP_EOL);
+            $conn['id'] = count($client);
+            $conn['conn'] = $newsock;
+            $newclient = $newsock;
+            $message = $frame->encode("new user ".$conn['id']." joined");
+            foreach ($client as $key => $value) {
+                socket_write($value['conn'], $message, strlen($message));
+            }
+            array_push($client, $conn);
+            // var_dump($client);
             
         }
         
-        
-        if($client){
-            if (!($string = socket_read($client, 4096))){
 
-            }else{
-                if($string){
-                    print_r($string.PHP_EOL);
+        
+        if(count($client)){
+            if ($newclient){
+                if (($string = socket_read($newclient, 1024))){
                     preg_match('/Sec-WebSocket-Key: (.*)\r\n/', $string, $matches);  //reges by chatGPT
                     if(count($matches)){
                         $key = $matches[1];
@@ -85,48 +89,40 @@
                         $response .= "Connection: upgrade\r\n";
                         $response .= "Sec-WebSocket-Accept: $key1\r\n";
                         $response .= "\r\n";
-                        socket_write($client, $response, mb_strlen($response));
-                        print_r(' header sent'.PHP_EOL);
+                        socket_write($newclient, $response, mb_strlen($response));
+                        $message = $frame->encode('your id is '.$client[count($client) - 1]['id']);
+                        socket_write($newclient, $message, mb_strlen($message));
+                        print_r('new user connection success'.PHP_EOL);
+                        unset($string);
+                        $newclient = null;
                     }
-                    else{
-                        var_dump($frame->decode($string));
-                    }
-
                 }
-                
-                
-                
-                // socket_close($sock);
-                // exit();
             }
-        }
-        
-        
-    }
-    socket_close($sock);
 
-    function genWebSockKey($string){
-        $lines = explode(PHP_EOL,$string);
-        // var_dump($lines);
-                    $headers = [];
+            foreach ($client as $key => $value) {
+                if (!($string = socket_read($value['conn'], 1024))){
 
-                    foreach ($lines as $index=>$header){
-                        if ($index > 0){
-
-                            // Trim the header of whitespace - is it blank?
-                            if (trim($header) !== ""){
-
-                                // Extract the header name and value
-                                preg_match("/([^\:]+): \s*(.+)/", $header, $matches);
-                                $headers[$matches[1]] = $matches[2];
+                }else{
+                    if($string){
+                            if($rawMessage = $frame->decode($string))
+                                $message = $frame->encode(json_encode(Array('sender' => $value['id'],
+                                                        'messsage' =>$rawMessage['payload'])));
+                            else
+                                $message = $frame->encode($string);   ///for netcat
+                            foreach ($client as $k => $v) {
+                                socket_write($v['conn'], $message, mb_strlen($message));
                             }
                         }
+    
                     }
-
-                    $uuid = '3a703da1-93db-41dd-b306-36e40d824288';
-                    // print_r($headers['Sec-WebSocket-Key']);
-                    // var_dump($headers);
-                    return base64_encode(sha1($headers['Sec-WebSocket-Key'].$uuid, true));
-
+            
+        }
+        
+        sleep(1);
+        
     }
+}
+    socket_close($sock);
+
+    
 ?>
