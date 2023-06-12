@@ -11,10 +11,10 @@
 </head>
 <body onload="">
     <div id="setid">
-        <input type="text" id='id-inp'>
-        <button onclick="setid()">send</button>
+        <input type="text" id='id-inp' placeholder="enter your id(a or b)">
+        <button onclick="setid()">set id</button>
     </div>
-        <input type="text" id='inp'>
+        <input type="text" id='inp' placeholder="message">
         <button onclick="send()">send</button>
     <div id="main"></div>
 </body>
