@@ -19,4 +19,4 @@ it includes:
 
 ## funfact
 
-regular HTTP polling is is frequently used. server sent events is not supported by all. HTTP long polling and Websockets are used frequently. they are used alternatively. whenever, websocket are supported it is preferred, and if not HTTP long polling is used.
+HTTP regular polling is is frequently used. server sent events is not supported by all. HTTP long polling and Websockets are used frequently. they are used alternatively. whenever, websocket are supported it is preferred, and if not HTTP long polling is used.
