@@ -23,9 +23,9 @@
     
     // Set the ip and port we will listen on
     
-    $address = '127.0.0.1';
+    $address = '192.168.1.87';
     
-    $port = 8080;
+    $port = 6317;
     
     // Create a TCP Stream socket
     
@@ -61,15 +61,20 @@
         if ($newsock = @socket_accept($sock))
     
         {
-            printf('new user'.PHP_EOL);
+            // printf('new user'.PHP_EOL);
             $conn['id'] = count($client);
             $conn['conn'] = $newsock;
             $newclient = $newsock;
-            $message = $frame->encode("new user ".$conn['id']." joined");
+            $tmpJson = json_encode(Array(
+                'sender' => '',
+                'message' => "new user ".$conn['id']." joined"
+            ));
+            $message = $frame->encode($tmpJson);
             foreach ($client as $key => $value) {
                 socket_write($value['conn'], $message, strlen($message));
             }
             array_push($client, $conn);
+            printf('user count'.count($client).PHP_EOL);
             // var_dump($client);
             
         }
@@ -90,9 +95,13 @@
                         $response .= "Sec-WebSocket-Accept: $key1\r\n";
                         $response .= "\r\n";
                         socket_write($newclient, $response, mb_strlen($response));
-                        $message = $frame->encode('your id is '.$client[count($client) - 1]['id']);
+                        $tmpJson = json_encode(Array(
+                            'sender' => '',
+                            'message' => 'your id is '.$client[count($client) - 1]['id']
+                        ));
+                        $message = $frame->encode($tmpJson);
                         socket_write($newclient, $message, mb_strlen($message));
-                        print_r('new user connection success'.PHP_EOL);
+                        // print_r('new user connection success'.PHP_EOL);
                         unset($string);
                         $newclient = null;
                     }
@@ -106,7 +115,7 @@
                     if($string){
                             if($rawMessage = $frame->decode($string))
                                 $message = $frame->encode(json_encode(Array('sender' => $value['id'],
-                                                        'messsage' =>$rawMessage['payload'])));
+                                                        'message' =>$rawMessage['payload'])));
                             else
                                 $message = $frame->encode($string);   ///for netcat
                             foreach ($client as $k => $v) {
