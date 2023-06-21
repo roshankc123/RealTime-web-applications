@@ -10,6 +10,10 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body onload="connect()">
+    <div id="stat">
+        <p>total: <strong id="u-total"></strong></p>
+        <p>active: <strong id="u-active"></strong></p>
+    </div>
     <input type="text" id="message">
     <button onclick="send()" id='send-btn' disabled>send</button>
     <div id="main"></div>
@@ -22,14 +26,21 @@
         function connect(){
             ////tested across network devices(like mobile and a laptop in a same network)
             wsock = new WebSocket('ws://'+location.hostname+'/ws');
+            // wsock = new WebSocket('ws://localhost:6317');
             wsock.onopen = () => {
                 RenderElement({'sender':'','message':'connection successfull'})
                 document.getElementById('send-btn').disabled = null;
             }
             wsock.onmessage = (message) => {
-                console.log(message)
+                // console.log(message)
                 let messageData = message.data
                 let messageObj = JSON.parse(messageData)
+                if(messageObj.sender == 'system'){
+                    let stat = JSON.parse(messageObj.message)
+                    document.getElementById('u-total').innerHTML = stat.total;
+                    document.getElementById('u-active').innerHTML = stat.active;
+                    messageObj.message = stat.message;
+                }
                 RenderElement(messageObj);
             }
         }

@@ -9,7 +9,6 @@
      * 
     ****/
 
-use function PHPSTORM_META\type;
 
     //for debugging set this to 1
     include 'websocket_frames.php';
@@ -95,14 +94,9 @@ use function PHPSTORM_META\type;
 
                 $clientSn++;
 
-                $message = "new user ".$conn['id']." joined";
-
-                // broadcast('system', $client, $message, $frame);
-
-                echo 'new client socket '.$conn['id'].' connected'.PHP_EOL;
-
+                // echo 'new client socket '.$conn['id'].' connected'.PHP_EOL;
+                }
             }
-        }
 
         foreach ($client as $read_socket) {
 
@@ -115,12 +109,18 @@ use function PHPSTORM_META\type;
 
                     unset($clientConn[$read_socket['id']]);
 
-                    echo 'client '.$read_socket['id'].' disconnected'.PHP_EOL;
+                    // echo 'client '.$read_socket['id'].' disconnected'.PHP_EOL;
 
-                    $message = "user ".$read_socket['id']." disconnected";
+                    $message = json_encode(
+                        array(
+                            'total' => $clientSn,
+                            'active' => count($clientConn),
+                            'message' => "user ".$read_socket['id']." disconnected"
+                        )
+                    );
 
                     broadcast('system', $client, $message, $frame);
-                    // var_dump($client);
+
                 }else{
                     if($recv_data){
 
@@ -140,14 +140,21 @@ use function PHPSTORM_META\type;
                             ///update the type of connection (etirher fromtermianl or from browser)
                             $client[$read_socket['id']]['type'] = 'websocket';
                             
+                            $message = json_encode(
+                                array(
+                                    'total' => $clientSn,
+                                    'active' => count($clientConn),
+                                    'message' => 'new user '.$read_socket['id'].' connected from browser'
+                                )
+                            );
 
                             // echo $response;
-                            broadcast('system', $client, 'new user '.$read_socket['id'].' connected', $frame);
+                            broadcast('system', $client, $message, $frame);
                             
                         }else{
 
                             // var_dump($recv_data);
-                            var_dump($read_socket);
+                            // var_dump($read_socket);
                             if($read_socket['type'] == 'websocket'){
                                 $message = $frame->decode($recv_data)['payload'];
                             }else{
@@ -158,7 +165,7 @@ use function PHPSTORM_META\type;
 
                             broadcast($read_socket['id'], $client, $message, $frame);
 
-                            echo $message.PHP_EOL;
+                            // echo $message.PHP_EOL;
                         }
                         
 
@@ -168,7 +175,8 @@ use function PHPSTORM_META\type;
             }
         }
         // sleep(1);
-}
+    }
+
     socket_close($sock);
 
 
@@ -183,6 +191,5 @@ function broadcast($sender, $receiver, $message, $frame){
     }
 
 }
-
     
 ?>
